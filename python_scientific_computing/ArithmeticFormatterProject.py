@@ -10,8 +10,8 @@ def construct_text_lines(problems):
     lines = [[], [], [], []]
     if len(problems) > 5:
         return 'Error: Too many problems.', None
-    for i in range(0, len(problems)):
-        error, operands, operator = validate_problem(problems[i])
+    for problem in problems:
+        error, operands, operator = validate_problem(problem)
         if error:
             return error, None
         result = calc_problem_result(operands, operator)
