@@ -1,33 +1,23 @@
 def arithmetic_arranger(problems, show_answers=False):
-    line_a = []
-    line_b = []
-    line_c = []
-    line_d = []
+    error, lines = construct_text_lines(problems)
+    if error:
+        return error
+    hide_last_line_if_needed(lines, show_answers)
+    return format_text(lines)
 
+
+def construct_text_lines(problems):
+    lines = [[], [], [], []]
     if len(problems) > 5:
-        return 'Error: Too many problems.'
-
+        return 'Error: Too many problems.', None
     for i in range(0, len(problems)):
-        error, a, operator, b = validate_problem(problems[i])
+        error, operands, operator = validate_problem(problems[i])
         if error:
-            return error
-        result = operate(a, operator, b)
-        operands_to_fill = [a, b]
-        filled_operands, result = fill_if_necessary(operands_to_fill, result)
-        a = filled_operands[0]
-        b = filled_operands[1]
-        append_to_line(line_a, ' ', a)
-        append_to_line(line_b, operator, b)
-        append_bar_to_line(line_c, len(a))
-        append_to_line(line_d, '', result)
-
-    lines = [line_a, line_b, line_c]
-
-    if show_answers:
-        lines.append(line_d)
-
-    text = create_text(lines)
-    return text
+            return error, None
+        result = calc_problem_result(operands, operator)
+        operands, result = fill_if_needed(operands, result)
+        append_data_to_lines(lines, operator, operands, result)
+    return None, lines
 
 
 def validate_problem(problem):
@@ -43,10 +33,10 @@ def validate_problem(problem):
     if len(a) > 4 or len(b) > 4:
         problem_error = 'Error: Numbers cannot be more than four digits.'
 
-    return problem_error, a, operator, b
+    return problem_error, [a, b], operator
 
 
-def fill_if_necessary(operands, result):
+def fill_if_needed(operands, result):
     max_size = get_max_size(operands)
     filled_operands = fill_operands(operands, max_size)
     filled_result = fill_string(str(result), max_size + 1)
@@ -71,24 +61,41 @@ def fill_string(string, max_size):
     return spaces_to_add + string
 
 
-def operate(operand_a, operator, operand_b):
+def calc_problem_result(operands, operator):
     result = 0
     if operator == '+':
-        result = int(operand_a) + int(operand_b)
+        result = int(operands[0]) + int(operands[1])
     else:
-        result = int(operand_a) - int(operand_b)
+        result = int(operands[0]) - int(operands[1])
     return result
 
 
-def append_to_line(line, operator, operand):
+def append_data_to_lines(lines, operator, operands, result):
+    a, b = operands
+    append_operation_to_line(lines[0], ' ', a)
+    append_operation_to_line(lines[1], operator, b)
+    append_bar_to_line(lines[2], len(a))
+    append_result_line(lines[3], result)
+
+
+def append_operation_to_line(line, operator, operand):
     line.append(operator + ' ' + operand + '    ')
+
+
+def append_result_line(line, result):
+    append_operation_to_line(line, '', result)
 
 
 def append_bar_to_line(line, length):
     line.append('-'*(length+2) + '    ')
 
 
-def create_text(lines):
+def hide_last_line_if_needed(lines, show_answers):
+    if not show_answers:
+        lines.pop()
+
+
+def format_text(lines):
     text = ''
     for i in range(0, len(lines)):
         text = text + ''.join(lines[i])[:-4] + '\n'
