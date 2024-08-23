@@ -5,18 +5,16 @@ days_dic = {'monday': 1, 'tuesday': 2, 'wednesday': 3,
 
 days_dic_reverse = {v: k.capitalize() for k, v in days_dic.items()}
 
-print(days_dic_reverse)
-
 
 def add_time(start, duration, start_day=None):
-    start_data = Time.parse(start)
-    days_passed = start_data.increment_by(duration)
-    end_day = calc_endday(start_day, days_passed)
-    text = construct_text(start_data, end_day, days_passed)
+    time = Time.parse(start)
+    days_passed = time.increment_by(duration)
+    end_day = calc_end_day(start_day, days_passed)
+    text = construct_text(time, end_day, days_passed)
     return text
 
 
-def calc_endday(start_day, days_passed):
+def calc_end_day(start_day, days_passed):
     if not start_day:
         return None
 
@@ -43,7 +41,6 @@ def initialize_text(time):
 def append_day_if_needed(text, day):
     if day:
         text = text + ', ' + day
-
     return text
 
 
@@ -76,8 +73,8 @@ class Time:
 
     @staticmethod
     def parse(data):
-        parsed_data = parse_time(data)
-        return Time(parsed_data[0], parsed_data[1], parsed_data[2])
+        hours, minutes, period = parse_time(data)
+        return Time(hours, minutes, period)
 
     def increment_by(self, increment_data):
         hours, minutes = parse_time(increment_data)
@@ -89,7 +86,7 @@ class Time:
             new_hour += 1
 
         days_passed = int(new_hour / 24)
-        new_hour -= (days_passed * 24)
+        new_hour = new_hour % 24
 
         self.hour = new_hour
         self.minute = new_minute
@@ -105,14 +102,6 @@ def fill_string(string, symbol, max_size):
 def parse_time(data):
     pattern = r'\w+'
     return re.findall(pattern, data)
-
-
-def add_date(base_date, increment):
-    result = []
-    result.append(int(base_date[0]) + int(increment[0]))
-    result.append(int(base_date[1]) + int(increment[1]))
-    result.append(base_date[2])
-    return result
 
 
 print(add_time('3:00 PM', '3:10'))
